@@ -34,6 +34,20 @@ impl Config {
     }
 }
 
+#[derive(Deserialize)]
+struct DnsResult {
+    dns_name: String,
+    dns_type: String,
+    results: Vec<ServerResult>,
+}
+
+#[derive(Deserialize)]
+struct ServerResult {
+    friendly_name: String,
+    server: String,
+    results: Vec<String>,
+}
+
 #[tokio::main]
 async fn main() {
     let matches = App::new("digger")
@@ -90,5 +104,16 @@ async fn main() {
         .expect("Failed to send request");
 
     let response_text = response.text().await.expect("Failed to read response text");
-    println!("Response: {}", response_text);
+
+    let dns_result: DnsResult = serde_json::from_str(&response_text).expect("Failed to parse response JSON");
+
+    println!("DNS Lookup Results:");
+    println!("DNS Name: {}", dns_result.dns_name);
+    println!("DNS Type: {}", dns_result.dns_type);
+    for server_result in dns_result.results {
+        println!("\nResults from DNS Server: {} ({})", server_result.friendly_name, server_result.server);
+        for answer in server_result.results {
+            println!("- {}", answer);
+        }
+    }
 }
