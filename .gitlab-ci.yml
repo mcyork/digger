@@ -1,0 +1,14 @@
+stages:
+  - build
+
+build:
+  image: rust:latest
+  stage: build
+  variables:
+    CARGO_TARGET_DIR: /build
+  script:
+    - rustup target add x86_64-pc-windows-msvc
+    - cargo build --release --target x86_64-pc-windows-msvc
+  artifacts:
+    paths:
+      - target/x86_64-pc-windows-msvc/release/digger.exe
