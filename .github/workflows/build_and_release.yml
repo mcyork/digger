@@ -15,13 +15,16 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact: digger-windows.exe
+            artifact_name: digger-windows.exe
+            artifact_path: digger.exe
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact: digger-macos
+            artifact_name: digger-macos
+            artifact_path: digger
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact: digger-linux
+            artifact_name: digger-linux
+            artifact_path: digger
 
     steps:
     - uses: actions/checkout@v4
@@ -34,12 +37,12 @@ jobs:
     - name: Upload Release Asset
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.artifact }}
-        path: target/${{ matrix.target }}/release/${{ matrix.artifact }}
+        name: ${{ matrix.artifact_name }}
+        path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
@@ -47,12 +50,12 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
+    - name: Upload Release Asset to Release
+      uses: actions/upload-release-asset@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: target/${{ matrix.target }}/release/${{ matrix.artifact }}
-        asset_name: ${{ matrix.artifact }}
+        asset_path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
+        asset_name: ${{ matrix.artifact_name }}
         asset_content_type: application/octet-stream
