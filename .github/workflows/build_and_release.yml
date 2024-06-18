@@ -67,3 +67,4 @@ jobs:
         asset_path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
         asset_name: ${{ matrix.artifact_name }}
         asset_content_type: application/octet-stream
+      if: always()
