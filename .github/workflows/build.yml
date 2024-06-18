@@ -16,17 +16,18 @@ jobs:
           - x86_64-pc-windows-msvc
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Rust
       uses: actions-rs/toolchain@v1
       with:
+        profile: minimal
         toolchain: stable
         target: ${{ matrix.target }}
         override: true
     - name: Build
       run: cargo build --release --target ${{ matrix.target }}
     - name: Upload Release Asset
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: digger-windows
         path: target/${{ matrix.target }}/release/digger.exe
