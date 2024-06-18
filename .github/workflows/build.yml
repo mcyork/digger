@@ -17,13 +17,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-        target: ${{ matrix.target }}
-        override: true
+    - name: Install Rust
+      run: |
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+        rustup target add ${{ matrix.target }}
     - name: Build
       run: cargo build --release --target ${{ matrix.target }}
     - name: Upload Release Asset
