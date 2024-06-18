@@ -6,16 +6,18 @@ on:
       - 'v*'
   workflow_dispatch:
 
+env:
+  CARGO_TERM_COLOR: always
+  RUST_LOG: "trace"
+
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: digger-windows.exe
+            artifact_name: digger-windows
             artifact_path: digger.exe
           - os: macos-latest
             target: x86_64-apple-darwin
@@ -26,14 +28,22 @@ jobs:
             artifact_name: digger-linux
             artifact_path: digger
 
+    runs-on: ${{ matrix.os }}
+
     permissions:
       contents: write  # Ensure the workflow has write permissions to contents
 
     steps:
     - uses: actions/checkout@v4
+    - uses: Swatinem/rust-cache@v2
+    - if: ${{ runner.os == 'Windows' }}
+      uses: ilammy/setup-nasm@v1
     - name: Install Rust
       run: |
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+        rustup set profile minimal
+        rustup toolchain install stable
+        rustup default stable
+        rustup override set stable
         rustup target add ${{ matrix.target }}
     - name: Build
       run: cargo build --release --target ${{ matrix.target }}
@@ -67,3 +77,4 @@ jobs:
         asset_path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
         asset_name: ${{ matrix.artifact_name }}
         asset_content_type: application/octet-stream
+      if: always()
