@@ -15,7 +15,7 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: digger-windows
+            artifact_name: digger-windows.exe
             artifact_path: digger.exe
           - os: macos-latest
             target: x86_64-apple-darwin
