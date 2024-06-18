@@ -19,30 +19,21 @@ jobs:
             target: x86_64-apple-darwin
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-          - os: ubuntu-latest
-            target: armv7-unknown-linux-gnueabihf  # For Raspberry Pi
 
     steps:
     - uses: actions/checkout@v4
-
-    # Install Rust for each OS
     - name: Install Rust
       run: |
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
         rustup target add ${{ matrix.target }}
-
-    # Build the project
     - name: Build
       run: cargo build --release --target ${{ matrix.target }}
-
-    # Upload the built binary as an artifact
     - name: Upload Release Asset
       uses: actions/upload-artifact@v4
       with:
         name: digger-${{ matrix.target }}
         path: target/${{ matrix.target }}/release/digger*
 
-    # Create a release and upload the artifacts
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
