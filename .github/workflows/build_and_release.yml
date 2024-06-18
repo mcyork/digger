@@ -15,13 +15,13 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact: digger-x86_64-pc-windows-msvc.exe
+            artifact: digger.exe
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact: digger-x86_64-apple-darwin
+            artifact: digger
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact: digger-x86_64-unknown-linux-gnu
+            artifact: digger
 
     steps:
     - uses: actions/checkout@v4
