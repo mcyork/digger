@@ -43,16 +43,21 @@ jobs:
         name: ${{ matrix.artifact_name }}
         path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
 
+    - name: Set Tag
+      id: set_tag
+      run: echo "TAG_NAME=v${GITHUB_SHA:0:7}-$(date +%s)" >> $GITHUB_ENV
+
     - name: Create Release
       id: create_release
       uses: ncipollo/release-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
-        tag: ${{ github.ref }}
-        name: Release ${{ github.ref }}
+        tag: ${{ env.TAG_NAME }}
+        name: Release ${{ env.TAG_NAME }}
         draft: false
         prerelease: false
+
     - name: Upload Release Asset to Release
       uses: actions/upload-release-asset@v1
       env:
@@ -62,4 +67,3 @@ jobs:
         asset_path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
         asset_name: ${{ matrix.artifact_name }}
         asset_content_type: application/octet-stream
-        
