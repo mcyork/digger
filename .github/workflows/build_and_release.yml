@@ -26,6 +26,9 @@ jobs:
             artifact_name: digger-linux
             artifact_path: digger
 
+    permissions:
+      contents: write  # Ensure the workflow has write permissions to contents
+
     steps:
     - uses: actions/checkout@v4
     - name: Install Rust
