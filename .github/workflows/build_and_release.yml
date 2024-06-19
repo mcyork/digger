@@ -90,9 +90,25 @@ jobs:
           mv ./artifacts/digger-macos/digger ./artifacts/digger-macos/digger-macos
           mv ./artifacts/digger-linux/digger ./artifacts/digger-linux/digger-linux
 
+      - name: Read and Increment Build Number
+        id: build_number
+        run: |
+          BUILD_NUMBER=$(cat build_number.txt)
+          NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+          echo $NEW_BUILD_NUMBER > build_number.txt
+          echo "BUILD_NUMBER=$NEW_BUILD_NUMBER" >> $GITHUB_ENV
+
+      - name: Commit Incremented Build Number
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add build_number.txt
+          git commit -m "Increment build number to $BUILD_NUMBER"
+          git push
+
       - name: Set Tag
         id: set_tag
-        run: echo "TAG_NAME=v${GITHUB_SHA:0:7}-$(date +%s)" >> $GITHUB_ENV
+        run: echo "TAG_NAME=v$BUILD_NUMBER" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
