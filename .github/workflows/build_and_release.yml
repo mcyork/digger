@@ -70,19 +70,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: digger-windows
-          path: ./artifacts
+          path: ./artifacts/digger-windows
 
       - name: Download MacOS artifact
         uses: actions/download-artifact@v4
         with:
           name: digger-macos
-          path: ./artifacts
+          path: ./artifacts/digger-macos
 
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
           name: digger-linux
-          path: ./artifacts
+          path: ./artifacts/digger-linux
 
       - name: Set Tag
         id: set_tag
@@ -108,7 +108,7 @@ jobs:
       - name: Upload Release Assets
         run: |
           UPLOAD_URL=$(echo "${{ steps.create_release.outputs.upload_url }}" | sed -e 's/{?name,label}//')
-          for file in ./artifacts/*; do
+          for file in ./artifacts/digger-*/*; do
             echo "Uploading $file to release ${TAG_NAME}"
             curl \
               -X POST \
