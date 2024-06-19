@@ -11,13 +11,23 @@ env:
   RUST_LOG: "trace"
 
 jobs:
-  buid-test-check:
+  build:
     strategy:
       matrix:
-        platform:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+        include:
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: digger-windows
+            artifact_path: digger.exe
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: digger-macos
+            artifact_path: digger
+          - platform: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: digger-linux
+            artifact_path: digger
+
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -37,3 +47,25 @@ jobs:
       - name: Build with All Features Enabled (Windows)
         if: ${{ runner.os == 'Windows' }}
         run: cargo build --verbose
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            This is an automatically generated release.
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ matrix.artifact_path }}
+          asset_name: ${{ matrix.artifact_name }}
+          asset_content_type: application/octet-stream
