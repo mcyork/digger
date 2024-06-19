@@ -29,7 +29,7 @@ jobs:
             artifact_path: digger
 
     runs-on: ${{ matrix.platform }}
-    
+
     permissions:
       contents: write  # Ensure the workflow has write permissions to contents
 
@@ -52,7 +52,7 @@ jobs:
         run: cargo build --verbose
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: actions/create-release@vv1.10.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -64,7 +64,7 @@ jobs:
           prerelease: false
       - name: Upload Release Asset
         id: upload_release_asset
-        uses: actions/upload-release-asset@v1
+        uses: actions/upload-release-asset@vv1.10.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
