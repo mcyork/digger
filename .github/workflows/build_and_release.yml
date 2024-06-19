@@ -84,6 +84,12 @@ jobs:
           name: digger-linux
           path: ./artifacts/digger-linux
 
+      - name: Rename Artifacts
+        run: |
+          mv ./artifacts/digger-windows/digger.exe ./artifacts/digger-windows/digger-windows.exe
+          mv ./artifacts/digger-macos/digger ./artifacts/digger-macos/digger-macos
+          mv ./artifacts/digger-linux/digger ./artifacts/digger-linux/digger-linux
+
       - name: Set Tag
         id: set_tag
         run: echo "TAG_NAME=v${GITHUB_SHA:0:7}-$(date +%s)" >> $GITHUB_ENV
@@ -108,7 +114,7 @@ jobs:
       - name: Upload Release Assets
         run: |
           UPLOAD_URL=$(echo "${{ steps.create_release.outputs.upload_url }}" | sed -e 's/{?name,label}//')
-          for file in ./artifacts/digger-*/*; do
+          for file in ./artifacts/*/*; do
             echo "Uploading $file to release ${TAG_NAME}"
             curl \
               -X POST \
