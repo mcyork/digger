@@ -47,17 +47,17 @@ jobs:
           rustup target add ${{ matrix.target }}
       - name: Build (Unix)
         if: ${{ runner.os == 'Linux' || runner.os == 'macOS' }}
-        run: cargo build --verbose --release
+        run: cargo build --verbose --release --target ${{ matrix.target }}
       - name: Build (Windows)
         if: ${{ runner.os == 'Windows' }}
-        run: cargo build --verbose --release
+        run: cargo build --verbose --release --target ${{ matrix.target }}
       - name: List target directory
         run: ls -R target
       - name: Upload Release Asset
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: target/release/${{ matrix.artifact_path }}
+          path: target/${{ matrix.target }}/release/${{ matrix.artifact_path }}
 
   release:
     needs: build
