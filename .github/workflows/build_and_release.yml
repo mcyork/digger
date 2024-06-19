@@ -59,6 +59,27 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: target/release/${{ matrix.artifact_path }}
 
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: digger-windows
+          path: .
+      - uses: actions/download-artifact@v4
+        with:
+          name: digger-macos
+          path: .
+      - uses: actions/download-artifact@v4
+        with:
+          name: digger-linux
+          path: .
+
       - name: Set Tag
         id: set_tag
         run: echo "TAG_NAME=v${GITHUB_SHA:0:7}-$(date +%s)" >> $GITHUB_ENV
@@ -82,38 +103,17 @@ jobs:
             });
             core.setOutput("upload_url", response.data.upload_url);
 
-      - name: Upload Release Asset to Release
-        uses: actions/github-script@v7
+      - name: Upload Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const { GITHUB_TOKEN, TAG_NAME } = process.env;
-
-            async function uploadAsset(filePath, uploadUrl) {
-              const fileName = path.basename(filePath);
-              const fileStat = fs.statSync(filePath);
-              const fileData = fs.readFileSync(filePath);
-
-              await github.rest.repos.uploadReleaseAsset({
-                url: uploadUrl,
-                headers: {
-                  'content-type': 'application/octet-stream',
-                  'content-length': fileStat.size,
-                },
-                name: fileName,
-                data: fileData,
-              });
-            }
-
-            const uploadUrl = core.getInput('upload_url');
-            const files = [
-              `target/release/${{ matrix.artifact_path }}`,
-            ];
-
-            for (const file of files) {
-              console.log(`Uploading ${file} to release ${TAG_NAME}`);
-              await uploadAsset(file, uploadUrl);
-            }
+        run: |
+          UPLOAD_URL=$(echo "${{ steps.create_release.outputs.upload_url }}" | sed -e 's/{?name,label}//')
+          for file in digger-windows digger-macos digger-linux; do
+            echo "Uploading $file to release ${TAG_NAME}"
+            curl \
+              -X POST \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary @$file \
+              "$UPLOAD_URL?name=$(basename $file)"
+          done
