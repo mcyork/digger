@@ -87,8 +87,6 @@ jobs:
       - name: Create Release
         id: create_release
         uses: actions/github-script@v7
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           script: |
             const { TAG_NAME } = process.env;
@@ -104,15 +102,13 @@ jobs:
             core.setOutput("upload_url", response.data.upload_url);
 
       - name: Upload Release Assets
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           UPLOAD_URL=$(echo "${{ steps.create_release.outputs.upload_url }}" | sed -e 's/{?name,label}//')
           for file in digger-windows digger-macos digger-linux; do
             echo "Uploading $file to release ${TAG_NAME}"
             curl \
               -X POST \
-              -H "Authorization: token $GH_TOKEN" \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Content-Type: application/octet-stream" \
               --data-binary @$file \
               "$UPLOAD_URL?name=$(basename $file)"
