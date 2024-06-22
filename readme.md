@@ -15,25 +15,28 @@ error: The following required arguments were not provided:
     <TYPE>
 
 USAGE:
-    digger-macos <DOMAIN> <TYPE>
+    digger-mac <DOMAIN> <TYPE>
 
-For more information, try --help
-% 
-% ./digger-macos --help
+For more information try --help
+
+% ./digger-mac --help
 digger 1.0
 A Rust CLI tool to perform DNS lookups using a specified API
 
 USAGE:
-    digger-macos [OPTIONS] [ARGS]
+    digger-mac [OPTIONS] [ARGS]
 
 ARGS:
     <DOMAIN>    The domain to look up
     <TYPE>      The DNS record type
 
 OPTIONS:
-        --config         Show the current configuration
-    -h, --help           Print help information
-        --setup <URL>    Set the API URL
-    -V, --version        Print version information
+        --advanced                     Enable advanced output
+        --config                       Show the current configuration
+        --dns-servers <DNS_SERVERS>    Comma-separated list of additional DNS servers to query
+    -h, --help                         Print help information
+        --setup <URL>                  Set the API URL
+    -V, --version                      Print version information
 % 
+
 ```
