@@ -45,7 +45,16 @@ struct DnsResult {
 struct ServerResult {
     friendly_name: String,
     server: String,
-    results: Vec<String>,
+    results: Vec<RecordResult>,
+}
+
+#[derive(Deserialize)]
+struct RecordResult {
+    query_name: String,
+    record: String,
+    r#type: String,
+    ttl: u32,
+    authoritative: bool,
 }
 
 #[tokio::main]
@@ -69,6 +78,14 @@ async fn main() {
             .help("The DNS record type")
             .required_unless_one(&["setup", "config"])
             .index(2))
+        .arg(Arg::with_name("advanced")
+            .long("advanced")
+            .help("Enable advanced output"))
+        .arg(Arg::with_name("dns_servers")
+            .long("dns-servers")
+            .value_name("DNS_SERVERS")
+            .help("Comma-separated list of additional DNS servers to query")
+            .takes_value(true))
         .get_matches();
 
     if let Some(url) = matches.value_of("setup") {
@@ -88,13 +105,20 @@ async fn main() {
     let config = Config::load().expect("Configuration not found. Run 'digger --setup <URL>' first.");
     let domain = matches.value_of("DOMAIN").unwrap();
     let record_type = matches.value_of("TYPE").unwrap();
+    let advanced = matches.is_present("advanced");
+
+    let default_dns_servers = vec!["8.8.8.8", "1.1.1.1"];
+    let dns_servers: Vec<String> = matches.value_of("dns_servers")
+        .map(|s| s.split(',').map(|s| s.to_string()).collect())
+        .unwrap_or_else(|| default_dns_servers.iter().map(|&s| s.to_string()).collect());
 
     let client = Client::new();
     let request_body = serde_json::json!({
         "dns_name": domain,
         "dns_type": record_type,
-        "dns_servers": ["8.8.8.8", "1.1.1.1"],  // Example servers; you can modify as needed
-        "protocol": "UDP"  // Example protocol; you can modify as needed
+        "dns_servers": dns_servers,
+        "protocol": "UDP",
+        "advanced": advanced
     });
 
     let response = client.post(&config.api_url)
@@ -113,7 +137,14 @@ async fn main() {
     for server_result in dns_result.results {
         println!("\nResults from DNS Server: {} ({})", server_result.friendly_name, server_result.server);
         for answer in server_result.results {
-            println!("- {}", answer);
+            if advanced {
+                println!(
+                    "{}\t{}\tIN\t{}\t{}",
+                    answer.query_name, answer.ttl, answer.r#type, answer.record
+                );
+            } else {
+                println!("- {}", answer.record);
+            }
         }
     }
 }
