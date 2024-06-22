@@ -139,8 +139,9 @@ async fn main() {
         for answer in server_result.results {
             if advanced {
                 println!(
-                    "{}\t{}\tIN\t{}\t{}",
-                    answer.query_name, answer.ttl, answer.r#type, answer.record
+                    "{}\t{}\tIN\t{}\t{}\t{}",
+                    answer.query_name, answer.ttl, answer.r#type, answer.record,
+                    if answer.authoritative { "authoritative" } else { "non-authoritative" }
                 );
             } else {
                 println!("- {}", answer.record);
